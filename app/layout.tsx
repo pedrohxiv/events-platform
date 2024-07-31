@@ -12,7 +12,7 @@ const font = Poppins({
 export const metadata: Metadata = {
   title: "Events Platform",
   description: "Events Platform is a platform for event management.",
-  icons: { icon: "/assets/icons/logo.svg" },
+  icons: { icon: "/icons/logo.svg" },
 };
 
 interface Props {
