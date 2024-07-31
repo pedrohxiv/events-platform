@@ -1,3 +1,4 @@
+import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 
 interface Props {
@@ -9,6 +10,7 @@ const RootLayout = ({ children }: Props) => {
     <div className="flex h-screen flex-col">
       <Header />
       <main className="flex-1">{children}</main>
+      <Footer />
     </div>
   );
 };
