@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 
@@ -21,9 +22,11 @@ interface Props {
 
 const AppLayout = ({ children }: Props) => {
   return (
-    <html>
-      <body className={font.variable}>{children}</body>
-    </html>
+    <ClerkProvider>
+      <html>
+        <body className={font.variable}>{children}</body>
+      </html>
+    </ClerkProvider>
   );
 };
 
