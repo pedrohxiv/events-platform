@@ -49,3 +49,36 @@ export const createEvent = async ({
     throw new Error(JSON.stringify(error));
   }
 };
+
+export const getEventById = async (id: string) => {
+  try {
+    const event = await db.event.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        organizer: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    return event;
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+};
