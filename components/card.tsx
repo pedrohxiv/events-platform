@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { Actions } from "@/components/actions";
 import { formatDateTime } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface Props {
   event: Event & {
@@ -20,6 +21,8 @@ interface Props {
 export const Card = ({ event, hasOrderLink, hideBadges }: Props) => {
   const { session } = useSession();
 
+  const router = useRouter();
+
   return (
     <div className="group relative flex min-h-[380px] w-full max-w-[400px] flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-lg md:min-h-[438px]">
       <Link
@@ -30,9 +33,9 @@ export const Card = ({ event, hasOrderLink, hideBadges }: Props) => {
       {session?.user.id === event.organizer.clerkId && !hideBadges && (
         <Actions eventId={event.id} />
       )}
-      <Link
-        href={`/events/${event.id}`}
+      <div
         className="flex min-h-[230px] flex-col gap-3 p-5 md:gap-4"
+        onClick={() => router.push(`/events/${event.id}`)}
       >
         {!hideBadges && (
           <div className="flex gap-2">
@@ -66,7 +69,7 @@ export const Card = ({ event, hasOrderLink, hideBadges }: Props) => {
             </Link>
           )}
         </div>
-      </Link>
+      </div>
     </div>
   );
 };

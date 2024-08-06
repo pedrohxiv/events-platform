@@ -261,3 +261,61 @@ export async function getRelatedEvents({
     throw new Error(JSON.stringify(error));
   }
 }
+
+interface GetEventsByUserProps {
+  page: number;
+  clerkId: string;
+  limit?: number;
+}
+
+export async function getEventsByUser({
+  page,
+  clerkId,
+  limit = 6,
+}: GetEventsByUserProps) {
+  try {
+    const organizer = await db.user.findUnique({
+      where: {
+        clerkId,
+      },
+    });
+
+    if (!organizer) {
+      throw new Error("Organizer not found");
+    }
+
+    const events = await db.event.findMany({
+      where: {
+        organizerId: organizer.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: (Number(page) - 1) * limit,
+      take: limit,
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        organizer: {
+          select: {
+            clerkId: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return {
+      data: events,
+      totalPages: Math.ceil(events.length / limit),
+    };
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+}
