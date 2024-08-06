@@ -210,3 +210,54 @@ export const updateEvent = async ({
     throw new Error(JSON.stringify(error));
   }
 };
+
+interface GetRelatedEventsProps {
+  categoryId: string;
+  eventId: string;
+  page: number | string;
+  limit?: number;
+}
+
+export async function getRelatedEvents({
+  categoryId,
+  eventId,
+  page = 1,
+  limit = 3,
+}: GetRelatedEventsProps) {
+  try {
+    const events = await db.event.findMany({
+      where: {
+        categoryId,
+        id: { not: eventId },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: (Number(page) - 1) * limit,
+      take: limit,
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        organizer: {
+          select: {
+            clerkId: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return {
+      data: events,
+      totalPages: Math.ceil(events.length / limit),
+    };
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+}
