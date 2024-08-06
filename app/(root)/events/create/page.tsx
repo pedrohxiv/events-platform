@@ -1,4 +1,4 @@
-import { EventForm } from "../_components/event-form";
+import { EventForm } from "@/components/event-form";
 
 const CreatePage = () => {
   return (
@@ -9,7 +9,7 @@ const CreatePage = () => {
         </h3>
       </section>
       <div className="wrapper my-8">
-        <EventForm type="Create" />
+        <EventForm type="create" />
       </div>
     </>
   );

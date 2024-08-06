@@ -29,10 +29,10 @@ model Event {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   title         String
   imageUrl      String
-  description   String?
-  location      String?
-  price         String?
-  url           String?
+  description   String
+  location      String
+  price         String
+  url           String
   isFree        Boolean  @default(false)
   createdAt     DateTime @default(now())
   startDateTime DateTime @default(now())
@@ -47,7 +47,7 @@ model Event {
 model Order {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   stripeId    String   @unique
-  totalAmount String?
+  totalAmount String
   createdAt   DateTime @default(now())
   eventId     String   @db.ObjectId
   event       Event    @relation(fields: [eventId], references: [id])

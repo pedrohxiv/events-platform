@@ -1,9 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { getAllEvents } from "@/actions/event";
+import { Collection } from "@/components/collection";
 import { Button } from "@/components/ui/button";
 
-const RootPage = () => {
+const RootPage = async () => {
+  const events = await getAllEvents({ limit: 6 });
+
   return (
     <>
       <section className="bg-primary-50 bg-dotted-pattern bg-contain py-5 md:py-10">
@@ -37,6 +41,15 @@ const RootPage = () => {
           Trust by <br /> Thousands of Events
         </h2>
         <div className="flex w-full flex-col gap-5 md:flex-row"></div>
+        <Collection
+          data={events.data}
+          emptyTitle="No Events Found"
+          emptySubtitle="Come back later"
+          collectionType="All_Events"
+          limit={6}
+          page={1}
+          totalPages={2}
+        />
       </section>
     </>
   );

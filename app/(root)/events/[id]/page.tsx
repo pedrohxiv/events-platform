@@ -1,15 +1,20 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getEventById } from "@/actions/event";
+import { Actions } from "@/components/actions";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
+import { currentUser } from "@clerk/nextjs/server";
 
 interface Props {
   params: { id: string };
 }
 
 const EventPage = async ({ params }: Props) => {
+  const user = await currentUser();
+
   const event = await getEventById(params.id);
 
   if (!event) {
@@ -26,8 +31,8 @@ const EventPage = async ({ params }: Props) => {
           alt="event"
           className="h-full min-h-[300px] object-cover object-center"
         />
-        <div className="flex w-full flex-col gap-8 p-5 md:p-10">
-          <div className="flex flex-col gap-6">
+        <div className="relative flex w-full flex-col gap-8 p-5 md:p-10">
+          <div className="relative flex flex-col gap-6">
             <h2 className="h2-bold">{event.title}</h2>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex gap-3">
@@ -45,6 +50,9 @@ const EventPage = async ({ params }: Props) => {
                 </span>
               </p>
             </div>
+            {user?.id === event.organizer.clerkId && (
+              <Actions eventId={event.id} />
+            )}
           </div>
           <Button>Buy Ticket</Button>
           <div className="flex flex-col gap-5">
@@ -77,9 +85,18 @@ const EventPage = async ({ params }: Props) => {
           <div className="flex flex-col gap-2">
             <p className="p-bold-20 text-grey-600">What You&apos;ll Learn:</p>
             <p className="p-medium-16 lg:p-regular-18">{event.description}</p>
-            <p className="p-medium-16 lg:p-regular-18 truncate text-primary-500 underline">
-              {event.url}
-            </p>
+            <div className="flex flex-row items-center gap-2 text-left">
+              <p className="p-bold-20 text-grey-600 flex-shrink-0">
+                Read more about:
+              </p>
+              <Link
+                href={event.url}
+                target="_blank"
+                className="p-medium-16 lg:p-regular-18 truncate text-primary-500 underline cursor-pointer"
+              >
+                {event.url}
+              </Link>
+            </div>
           </div>
         </div>
       </div>

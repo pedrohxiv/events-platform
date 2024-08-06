@@ -2,13 +2,14 @@
 
 import { useSession } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Event } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { createEvent } from "@/actions/event";
+import { createEvent, updateEvent } from "@/actions/event";
 import { DatePicker } from "@/components/date-picker";
 import { Dropdown } from "@/components/dropdown";
 import { FileUploader } from "@/components/file-uploader";
@@ -30,12 +31,13 @@ import { cn } from "@/lib/utils";
 import { eventFormSchema } from "@/lib/validators";
 
 interface Props {
-  type: "Create" | "Update";
+  type: "create" | "update";
+  data?: Event;
 }
 
-export const EventForm = ({ type }: Props) => {
+export const EventForm = ({ type, data }: Props) => {
   const [files, setFiles] = useState<File[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { session } = useSession();
   const { toast } = useToast();
@@ -45,7 +47,7 @@ export const EventForm = ({ type }: Props) => {
 
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
-    defaultValues: eventDefaultValues,
+    defaultValues: type === "update" ? data : eventDefaultValues,
   });
 
   const onSubmit = async (values: z.infer<typeof eventFormSchema>) => {
@@ -67,28 +69,46 @@ export const EventForm = ({ type }: Props) => {
       imageUrl = uploadedImages[0].url;
     }
 
-    if (type === "Create") {
-      try {
-        const event = await createEvent({
-          data: { ...values, imageUrl },
-          path: "/profile",
-          clerkId: session.user.id,
-        });
+    try {
+      let event: Event;
 
-        if (event) {
-          form.reset();
+      switch (type) {
+        case "create":
+          event = await createEvent({
+            data: { ...values, imageUrl },
+            pathname: "/profile",
+            clerkId: session.user.id,
+          });
 
-          router.push(`/events/${event.id}`);
-        }
-      } catch (error) {
-        console.error(error);
+          break;
+        case "update":
+          if (!data?.id) {
+            return router.back();
+          }
 
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "There was a problem with your request.",
-        });
+          event = await updateEvent({
+            data: { ...values, imageUrl },
+            id: data.id,
+            pathname: `/events/${data.id}`,
+            clerkId: session.user.id,
+          });
+
+          break;
       }
+
+      if (event) {
+        form.reset();
+
+        router.push(`/events/${event.id}`);
+      }
+    } catch (error) {
+      console.error(error);
+
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+      });
     }
 
     setIsLoading(false);
@@ -289,7 +309,10 @@ export const EventForm = ({ type }: Props) => {
                               </label>
                               <Checkbox
                                 id="isFree"
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(checked) => {
+                                  field.onChange(checked);
+                                  if (checked) form.setValue("price", "");
+                                }}
                                 checked={field.value}
                                 className="mr-2 h-5 w-5 border-2 border-primary-500 focus-visible:ring-transparent"
                                 disabled={isLoading}

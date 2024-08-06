@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { db } from "@/lib/db";
 
 interface CreateEventProps {
@@ -15,13 +17,13 @@ interface CreateEventProps {
     title: string;
     url: string;
   };
-  path: string;
+  pathname: string;
   clerkId: string;
 }
 
 export const createEvent = async ({
   data,
-  path,
+  pathname,
   clerkId,
 }: CreateEventProps) => {
   try {
@@ -41,6 +43,8 @@ export const createEvent = async ({
         organizerId: organizer.id,
       },
     });
+
+    revalidatePath(pathname);
 
     return event;
   } catch (error) {
@@ -64,6 +68,7 @@ export const getEventById = async (id: string) => {
         },
         organizer: {
           select: {
+            clerkId: true,
             firstName: true,
             lastName: true,
           },
@@ -74,6 +79,129 @@ export const getEventById = async (id: string) => {
     if (!event) {
       throw new Error("Event not found");
     }
+
+    return event;
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+};
+
+interface GetAllEventsProps {
+  category?: string;
+  limit?: number;
+  page?: number;
+  query?: string;
+}
+
+export const getAllEvents = async ({
+  category,
+  limit = 6,
+  page,
+  query,
+}: GetAllEventsProps) => {
+  try {
+    const events = await db.event.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: 0,
+      take: limit,
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        organizer: {
+          select: {
+            clerkId: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return {
+      data: events,
+      totalPages: Math.ceil(events.length / limit),
+    };
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+};
+
+interface DeleteEventProps {
+  id: string;
+  pathname: string;
+}
+
+export const deleteEvent = async ({ id, pathname }: DeleteEventProps) => {
+  try {
+    await db.event.delete({
+      where: {
+        id,
+      },
+    });
+
+    revalidatePath(pathname);
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+};
+
+interface UpdateEventProps {
+  data: {
+    categoryId: string;
+    description: string;
+    endDateTime: Date;
+    imageUrl: string;
+    isFree: boolean;
+    location: string;
+    price: string;
+    startDateTime: Date;
+    title: string;
+    url: string;
+  };
+  id: string;
+  pathname: string;
+  clerkId: string;
+}
+
+export const updateEvent = async ({
+  data,
+  id,
+  pathname,
+  clerkId,
+}: UpdateEventProps) => {
+  try {
+    const organizer = await db.user.findUnique({
+      where: {
+        clerkId,
+      },
+    });
+
+    if (!organizer) {
+      throw new Error("Organizer not found");
+    }
+
+    const event = await db.event.update({
+      where: {
+        id,
+        organizerId: organizer.id,
+      },
+      data: {
+        ...data,
+      },
+    });
+
+    revalidatePath(pathname);
 
     return event;
   } catch (error) {

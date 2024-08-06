@@ -1,5 +1,5 @@
 import type { Category } from "@prisma/client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createCategory, getAllCategories } from "@/actions/category";
 import { Button } from "@/components/ui/button";
@@ -34,11 +34,11 @@ export const Dropdown = ({ disabled, onChangeHandler, value }: Props) => {
   const [newCategory, setNewCategory] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const handleAddCategory = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateCategory = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    createCategory({ name: newCategory.trim() }).then((category) =>
+    await createCategory({ name: newCategory.trim() }).then((category) =>
       setCategories((prev) => [...prev, category])
     );
 
@@ -77,11 +77,11 @@ export const Dropdown = ({ disabled, onChangeHandler, value }: Props) => {
           <DialogContent className="bg-white">
             <DialogHeader>
               <DialogTitle>New Category</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="p-regular-16 text-grey-600">
                 Create a category for your event.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleAddCategory}>
+            <form onSubmit={handleCreateCategory}>
               <Input
                 type="text"
                 placeholder="Category name"
