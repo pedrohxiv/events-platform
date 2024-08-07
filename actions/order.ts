@@ -59,3 +59,65 @@ export const checkoutOrder = async ({
     throw new Error(JSON.stringify(error));
   }
 };
+
+interface GetOrdersByUserProps {
+  page: number;
+  clerkId: string;
+  limit?: number;
+}
+
+export async function getOrdersByUser({
+  page,
+  clerkId,
+  limit = 6,
+}: GetOrdersByUserProps) {
+  try {
+    const buyer = await db.user.findUnique({
+      where: {
+        clerkId,
+      },
+    });
+
+    if (!buyer) {
+      throw new Error("Buyer not found");
+    }
+
+    const orders = await db.order.findMany({
+      where: {
+        buyerId: buyer.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: (Number(page) - 1) * limit,
+      take: limit,
+      include: {
+        event: {
+          include: {
+            category: {
+              select: {
+                name: true,
+              },
+            },
+            organizer: {
+              select: {
+                clerkId: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      data: orders,
+      totalPages: Math.ceil(orders.length / limit),
+    };
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+}

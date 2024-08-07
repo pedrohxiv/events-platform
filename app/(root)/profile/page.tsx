@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getEventsByUser } from "@/actions/event";
+import { getOrdersByUser } from "@/actions/order";
 import { Collection } from "@/components/collection";
 import { Button } from "@/components/ui/button";
 
@@ -13,10 +14,8 @@ const ProfilePage = async () => {
     return notFound();
   }
 
-  const organizedEvents = await getEventsByUser({
-    page: 1,
-    clerkId: user.id,
-  });
+  const events = await getEventsByUser({ page: 1, clerkId: user.id });
+  const orders = await getOrdersByUser({ page: 1, clerkId: user.id });
 
   return (
     <>
@@ -28,7 +27,18 @@ const ProfilePage = async () => {
           </Button>
         </div>
       </section>
-      <section className="wrapper my-8"></section>
+      <section className="wrapper my-8">
+        <Collection
+          data={orders.data.map((order) => order.event)}
+          emptyTitle="No Event Tickets Purchased Yet"
+          emptySubtitle="No worries - plenty of exciting events to explore!"
+          collectionType="My_Tickets"
+          limit={3}
+          page={1}
+          urlParamName="ordersPage"
+          totalPages={2}
+        />
+      </section>
       <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
         <div className="wrapper flex items-center justify-center sm:justify-between">
           <h3 className="h3-bold text-center sm:text-left">Events Organized</h3>
@@ -39,7 +49,7 @@ const ProfilePage = async () => {
       </section>
       <section className="wrapper my-8">
         <Collection
-          data={organizedEvents.data}
+          data={events.data}
           emptyTitle="No Event Have Been Created Yet"
           emptySubtitle="Go create some now"
           collectionType="Events_Organized"
