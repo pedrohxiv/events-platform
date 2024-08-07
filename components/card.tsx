@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import type { Event } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const Card = ({ event, hasOrderLink, hideBadges }: Props) => {
-  const { session } = useSession();
+  const { user } = useUser();
 
   const router = useRouter();
 
@@ -30,7 +30,7 @@ export const Card = ({ event, hasOrderLink, hideBadges }: Props) => {
         style={{ backgroundImage: `url(${event.imageUrl})` }}
         className="flex-center flex-grow bg-grey-50 bg-cover bg-center text-grey-500"
       />
-      {session?.user.id === event.organizer.clerkId && !hideBadges && (
+      {user?.id === event.organizer.clerkId && !hideBadges && (
         <Actions eventId={event.id} />
       )}
       <div

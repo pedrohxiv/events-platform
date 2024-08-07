@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Event } from "@prisma/client";
 import Image from "next/image";
@@ -39,7 +39,7 @@ export const EventForm = ({ type, data }: Props) => {
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { session } = useSession();
+  const { user } = useUser();
   const { toast } = useToast();
   const { startUpload } = useUploadThing("imageUploader");
 
@@ -53,7 +53,7 @@ export const EventForm = ({ type, data }: Props) => {
   const onSubmit = async (values: z.infer<typeof eventFormSchema>) => {
     setIsLoading(true);
 
-    if (!session?.user) {
+    if (!user) {
       return;
     }
 
@@ -77,7 +77,7 @@ export const EventForm = ({ type, data }: Props) => {
           event = await createEvent({
             data: { ...values, imageUrl },
             pathname: "/profile",
-            clerkId: session.user.id,
+            clerkId: user.id,
           });
 
           break;
@@ -90,7 +90,7 @@ export const EventForm = ({ type, data }: Props) => {
             data: { ...values, imageUrl },
             id: data.id,
             pathname: `/events/${data.id}`,
-            clerkId: session.user.id,
+            clerkId: user.id,
           });
 
           break;

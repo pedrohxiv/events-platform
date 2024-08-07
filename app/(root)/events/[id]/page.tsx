@@ -5,8 +5,8 @@ import { notFound } from "next/navigation";
 
 import { getEventById, getRelatedEvents } from "@/actions/event";
 import { Actions } from "@/components/actions";
+import { CheckoutButton } from "@/components/checkout-button";
 import { Collection } from "@/components/collection";
-import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
 
 interface Props {
@@ -62,7 +62,7 @@ const EventPage = async ({ params, searchParams }: Props) => {
                 <Actions eventId={event.id} />
               )}
             </div>
-            <Button>Buy Ticket</Button>
+            <CheckoutButton event={event} />
             <div className="flex flex-col gap-5">
               <div className="flex gap-2 md:gap-3">
                 <Image

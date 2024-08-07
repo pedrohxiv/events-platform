@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton, useSession } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,7 +13,7 @@ import { headerLinks } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export const Header = () => {
-  const { isLoaded, isSignedIn } = useSession();
+  const { isLoaded, isSignedIn } = useUser();
 
   const pathname = usePathname();
 
