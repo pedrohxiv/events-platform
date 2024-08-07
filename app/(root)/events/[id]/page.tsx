@@ -115,7 +115,7 @@ const EventPage = async ({ params, searchParams }: Props) => {
           data={relatedEvents.data}
           emptyTitle="No Events Found"
           emptySubtitle="Come back later"
-          collectionType="All_Events"
+          collectionType="all_events"
           limit={6}
           page={1}
           totalPages={2}
