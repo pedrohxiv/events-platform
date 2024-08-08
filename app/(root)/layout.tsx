@@ -10,7 +10,7 @@ const RootLayout = ({ children }: Props) => {
   return (
     <div className="flex h-screen flex-col">
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="flex flex-col flex-1">{children}</main>
       <Toaster />
       <Footer />
     </div>

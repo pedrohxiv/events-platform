@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { getCategoryByName } from "@/actions/category";
 import { db } from "@/lib/db";
 
 interface CreateEventProps {
@@ -56,6 +57,10 @@ export const createEvent = async ({
 
 export const getEventById = async (id: string) => {
   try {
+    if (id.length !== 24) {
+      return null;
+    }
+
     const event = await db.event.findFirst({
       where: {
         id,
@@ -77,7 +82,7 @@ export const getEventById = async (id: string) => {
     });
 
     if (!event) {
-      throw new Error("Event not found");
+      return null;
     }
 
     return event;
@@ -89,24 +94,34 @@ export const getEventById = async (id: string) => {
 };
 
 interface GetAllEventsProps {
-  category?: string;
+  category: string;
+  page: number;
+  query: string;
   limit?: number;
-  page?: number;
-  query?: string;
 }
 
 export const getAllEvents = async ({
   category,
-  limit = 6,
   page,
   query,
+  limit = 6,
 }: GetAllEventsProps) => {
   try {
+    const categoryCondition = category
+      ? await getCategoryByName(category)
+      : null;
+
     const events = await db.event.findMany({
+      where: {
+        AND: [
+          query ? { title: { contains: query, mode: "insensitive" } } : {},
+          categoryCondition ? { categoryId: categoryCondition.id } : {},
+        ],
+      },
       orderBy: {
         createdAt: "desc",
       },
-      skip: 0,
+      skip: (Number(page) - 1) * limit,
       take: limit,
       include: {
         category: {
@@ -221,7 +236,7 @@ interface GetRelatedEventsProps {
 export async function getRelatedEvents({
   categoryId,
   eventId,
-  page = 1,
+  page,
   limit = 3,
 }: GetRelatedEventsProps) {
   try {
@@ -271,7 +286,7 @@ interface GetEventsByUserProps {
 export async function getEventsByUser({
   page,
   clerkId,
-  limit = 6,
+  limit = 3,
 }: GetEventsByUserProps) {
   try {
     const organizer = await db.user.findUnique({

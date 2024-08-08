@@ -17,7 +17,7 @@ interface Props {
   })[];
   emptySubtitle: string;
   emptyTitle: string;
-  page: number | string;
+  page: number;
   collectionType?: "all_events" | "created_events" | "orders";
   totalPages?: number;
   urlParamName?: string;
@@ -38,7 +38,7 @@ export const Collection = ({
   const searchParams = useSearchParams();
 
   const handleClick = (type: "previous" | "next") => {
-    const value = type === "next" ? Number(page) + 1 : Number(page) - 1;
+    const value = type === "next" ? page + 1 : page - 1;
 
     const url = formUrlQuery({
       key: urlParamName || "page",
@@ -66,10 +66,7 @@ export const Collection = ({
                     collectionType !== "orders" && (
                       <Actions eventId={event.id} />
                     )}
-                  <div
-                    className="flex min-h-[230px] flex-col gap-3 p-5 md:gap-4"
-                    onClick={() => router.push(`/events/${event.id}`)}
-                  >
+                  <div className="flex min-h-[230px] flex-col gap-3 p-5 md:gap-4">
                     {collectionType !== "orders" && (
                       <div className="flex gap-2">
                         <p className="p-semibold-14 w-min rounded-full bg-green-100 px-4 py-1 text-green-600">
@@ -83,9 +80,12 @@ export const Collection = ({
                     <p className="p-medium-16 md:p-medium-18 text-grey-500">
                       {formatDateTime(event.startDateTime).dateTime}
                     </p>
-                    <p className="p-medium-16 md:p-medium-20 line-clamp-2 flex-1 text-black">
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="p-medium-16 md:p-medium-20 line-clamp-2 flex-1 text-black cursor-pointer"
+                    >
                       {event.title}
-                    </p>
+                    </Link>
                     <div className="flex-between w-full">
                       <p className="p-medium-14 md:p-medium-16 text-grey-600">
                         {event.organizer.firstName} {event.organizer.lastName}
@@ -117,7 +117,7 @@ export const Collection = ({
                 variant="outline"
                 className="w-28"
                 onClick={() => handleClick("previous")}
-                disabled={Number(page) <= 1}
+                disabled={page <= 1}
               >
                 Previous
               </Button>
@@ -126,7 +126,7 @@ export const Collection = ({
                 variant="outline"
                 className="w-28"
                 onClick={() => handleClick("next")}
-                disabled={Number(page) >= totalPages}
+                disabled={page >= totalPages}
               >
                 Next
               </Button>

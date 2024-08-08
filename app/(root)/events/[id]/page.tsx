@@ -15,18 +15,21 @@ interface Props {
 }
 
 const EventPage = async ({ params, searchParams }: Props) => {
+  const page = Number(searchParams?.page) || 1;
+
   const user = await currentUser();
 
   const event = await getEventById(params.id);
-  const relatedEvents = await getRelatedEvents({
-    categoryId: event.categoryId,
-    eventId: event.id,
-    page: searchParams.page as string,
-  });
 
   if (!event) {
     return notFound();
   }
+
+  const relatedEvents = await getRelatedEvents({
+    categoryId: event.categoryId,
+    eventId: event.id,
+    page,
+  });
 
   return (
     <>
@@ -116,9 +119,8 @@ const EventPage = async ({ params, searchParams }: Props) => {
           emptyTitle="No Events Found"
           emptySubtitle="Come back later"
           collectionType="all_events"
-          limit={6}
-          page={1}
-          totalPages={2}
+          page={page}
+          totalPages={relatedEvents.totalPages}
         />
       </section>
     </>

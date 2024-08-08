@@ -69,7 +69,7 @@ interface GetOrdersByUserProps {
 export async function getOrdersByUser({
   page,
   clerkId,
-  limit = 6,
+  limit = 3,
 }: GetOrdersByUserProps) {
   try {
     const buyer = await db.user.findUnique({
@@ -115,6 +115,54 @@ export async function getOrdersByUser({
       data: orders,
       totalPages: Math.ceil(orders.length / limit),
     };
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+}
+
+interface GetOrdersByEventProps {
+  eventId: string;
+  search: string;
+}
+
+export async function getOrdersByEvent({
+  eventId,
+  search,
+}: GetOrdersByEventProps) {
+  try {
+    if (!eventId) {
+      throw new Error("Event ID is required");
+    }
+
+    const orders = await db.order.findMany({
+      where: {
+        eventId,
+        buyer: {
+          OR: [
+            { firstName: { contains: search, mode: "insensitive" } },
+            { lastName: { contains: search, mode: "insensitive" } },
+          ],
+        },
+      },
+      include: {
+        buyer: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        event: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+
+    return orders;
   } catch (error) {
     console.error(error);
 

@@ -33,3 +33,22 @@ export const getAllCategories = async () => {
     throw new Error(JSON.stringify(error));
   }
 };
+
+export const getCategoryByName = async (name: string) => {
+  try {
+    const category = await db.category.findFirst({
+      where: {
+        name: {
+          contains: name,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    return category;
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(JSON.stringify(error));
+  }
+};

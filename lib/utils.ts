@@ -69,3 +69,29 @@ export const formUrlQuery = ({
     { skipNull: true }
   );
 };
+
+export const formatPrice = (price: string) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(parseFloat(price));
+};
+
+export const removeKeysFromQuery = ({
+  params,
+  keysToRemove,
+}: {
+  params: string;
+  keysToRemove: string[];
+}) => {
+  const currentUrl = qs.parse(params);
+
+  keysToRemove.forEach((key) => {
+    delete currentUrl[key];
+  });
+
+  return qs.stringifyUrl(
+    { url: window.location.pathname, query: currentUrl },
+    { skipNull: true }
+  );
+};

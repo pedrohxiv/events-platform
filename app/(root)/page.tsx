@@ -2,11 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { getAllEvents } from "@/actions/event";
+import { CategoryFilter } from "@/components/category-filter";
 import { Collection } from "@/components/collection";
+import { Search } from "@/components/search";
 import { Button } from "@/components/ui/button";
 
-const RootPage = async () => {
-  const events = await getAllEvents({ limit: 6 });
+interface Props {
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+const RootPage = async ({ searchParams }: Props) => {
+  const category = (searchParams?.category as string) || "";
+  const query = (searchParams?.query as string) || "";
+  const page = Number(searchParams?.page) || 1;
+
+  const events = await getAllEvents({ category, page, query });
 
   return (
     <>
@@ -40,15 +50,17 @@ const RootPage = async () => {
         <h2 className="h2-bold">
           Trust by <br /> Thousands of Events
         </h2>
-        <div className="flex w-full flex-col gap-5 md:flex-row"></div>
+        <div className="flex w-full flex-col gap-5 md:flex-row">
+          <Search />
+          <CategoryFilter />
+        </div>
         <Collection
           data={events.data}
           emptyTitle="No Events Found"
           emptySubtitle="Come back later"
           collectionType="all_events"
-          limit={6}
-          page={1}
-          totalPages={2}
+          page={page}
+          totalPages={events.totalPages}
         />
       </section>
     </>
